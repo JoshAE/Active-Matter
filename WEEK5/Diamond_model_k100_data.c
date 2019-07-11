@@ -1,11 +1,7 @@
-/* Active 2D particles with a box search method*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <g2.h>
-#include <g2_X11.h>
 #include <unistd.h>
-#include <g2_gd.h>
 #define N 5000
 
 #define wsizex 1000
@@ -22,7 +18,6 @@ void force(void);
 double x[N],xold[N],phi,ext;
 
 
-double x2[N],y2[N],Fx2[N],Fy2[N],x2old[N],y2old[N],vx2[N],vy2[N],xoutput[N*100],youtput[N*100];
 double y[N];
 double vx[N];
 double sizex,sizey;
@@ -69,10 +64,8 @@ int main(void)
 
     scale=wsizex/sizex;
 
-    nx=(int)(88);
-    ny=(int)(80);
-    rinx=10/88;
-    riny=18/80;
+    nx=(int)(sizex-1);
+    ny=(int)(sizey-1);
     n=0;
 
 
@@ -104,42 +97,35 @@ int main(void)
     {
         vx[a]=0;
         vy[a]=0;
-        vx2[a]=0;
-        vy2[a]=0;
 
     }
 
 //initialising particle positions
 
-    for (b=0;b<ny;b++)
+    for (b=0;b<ny;b+=3)
     {
 
-        for (a=0;a<nx;a+=2)
+        for (a=0;a<nx;a+=4)
         {
             if(n < N)
             {
 
+                x[n]=a+1;
+                x[n+1]=a+3;
+                x[n+2]=a+2;
+                x[n+3]=a+2;
 
-                x[n]=rinx+(rinx*a/2)+(a*r*2);
-                y[n]=riny+(riny*b)+(2*r*b);
-
-
-
-                x[n+1]=x[n]+2*r;
-                y[n+1]=y[n];
-
-                n+=2;
+                y[n]=b+1.5;
+                y[n+1]=b+1.5;
+                y[n+2]=b+1.5+ext;
+                y[n+3]=b+1.5-ext;
+                n+=4;
             }
         }
 
     }
-    for (a=0;a<N;a+=2){
 
-        x2[a]=x[a]+r;
-        y2[a]=y[a]+ext;
-        x2[a+1]=x[a]+r;
-        y2[a+1]=y[a]-ext;
-    }
+
 
 
 
@@ -169,10 +155,7 @@ int main(void)
             d = sqrt((dx * dx) + (dy * dy));
 
             vx[a] = Vo * (dx / d) + Fx[a];
-
             vy[a] = Vo * (dy / d) + Fy[a];
-
-
             x[a] += vx[a] * del_t + sqrt(2 * del_t * D * 3) * (2 * drand48() - 1);
             y[a] += vy[a] * del_t + sqrt(2 * del_t * D * 3) * (2 * drand48() - 1);
 
@@ -214,43 +197,43 @@ int main(void)
             //Small particles
 
 
-            vx2[a] = Vo * (dx / d) + Fx2[a];
+            vx[a+2] = Vo * (dx / d) + Fx[a+2];
 
-            vy2[a] = Vo * (dy / d) + Fy2[a];
+            vy[a+2] = Vo * (dy / d) + Fy[a+2];
 
 
-            x2[a] += vx2[a] * del_t;
-            y2[a] += vy2[a] * del_t;
+            x[a+2] += vx[a+2] * del_t;
+            y[a+2] += vy[a+2] * del_t;
 
-            if (x2[a] < 0) {
-                x2[a] = x2[a] + sizex;
+            if (x[a+2] < 0) {
+                x[a+2] = x[a+2] + sizex;
             }
-            else if (x2[a] > sizex) {
-                x2[a] = x2[a] - sizex;
+            else if (x[a+2] > sizex) {
+                x[a+2] = x[a+2] - sizex;
             }
-            if (y2[a] < 0) {
-                y2[a] = y2[a] + sizey;
+            if (y[a+2] < 0) {
+                y[a+2] = y[a+2] + sizey;
             }
-            else if (y2[a] > sizey) {
-                y2[a] = y2[a] - sizey;
+            else if (y[a+2] > sizey) {
+                y[a+2] = y[a+2] - sizey;
             }
 
-            vx2[b] = Vo * (dx / d) + Fx2[b];
-            vy2[b] = Vo * (dy / d) + Fy2[b];
-            x2[b] += vx2[b] * del_t;
-            y2[b] += vy2[b] * del_t;
+            vx[b+2] = Vo * (dx / d) + Fx[b+2];
+            vy[b+2] = Vo * (dy / d) + Fy[b+2];
+            x[b+2] += vx[b+2] * del_t;
+            y[b+2] += vy[b+2] * del_t;
 
-            if (x2[b] < 0) {
-                x2[b] = x2[b] + sizex;
+            if (x[b+2] < 0) {
+                x[b+2] = x[b+2] + sizex;
             }
-            else if (x2[b] > sizex) {
-                x2[b] = x2[b] - sizex;
+            else if (x[b+2] > sizex) {
+                x[b+2] = x[b+2] - sizex;
             }
-            if (y2[b] < 0) {
-                y2[b] = y2[b] + sizey;
+            if (y[b+2] < 0) {
+                y[b+2] = y[b+2] + sizey;
             }
-            else if (y2[b] > sizey) {
-                y2[b] = y2[b] - sizey;
+            else if (y[b+2] > sizey) {
+                y[b+2] = y[b+2] - sizey;
             }
 
 
@@ -265,7 +248,7 @@ int main(void)
     fp = fopen(fname, "w");
     for (a=0;a<N;a++){
 
-        fprintf(fp, "%010.5f %010.5f %010.5f %010.5f \n", x[a], y[a],x2[a],y2[a]);
+        fprintf(fp, "%010.5f %010.5f \n", x[a], y[a]);
     }
 }
 
@@ -286,8 +269,6 @@ void force(void)
     for (c = 0; c < N; c++) {
         Fx[c] = 0;
         Fy[c] = 0;
-        Fx2[c] = 0;
-        Fy2[c] = 0;
     }
 
 
@@ -330,26 +311,6 @@ void force(void)
 
             }
 
-
-            dx = x2[b] - x[a];
-            if (dx > sizex / 2) dx = dx - sizex;
-            else if (dx < -sizex / 2) dx = dx + sizex;
-
-            dy = y2[b] - y[a];
-
-            if (dy > sizey / 2) dy = dy - sizey;
-            else if (dy < -sizey / 2) dy = dy + sizey;
-
-            d = sqrt((dx * dx) + (dy * dy));
-
-            if (d < r+r2) {
-                Fx2[b] += k * (r+r2 - d) * (dx / d);
-                Fx[a] += -k * (r+r2 - d) * (dx / d);
-                Fy2[b] += k * (r+r2 - d) * (dy / d);
-                Fy[a] += -k * (r+r2 - d) * (dy / d);
-
-            }
-
             a = list[a];
         }
 
@@ -377,26 +338,6 @@ void force(void)
 
                 }
 
-                dx = x2[b] - x[a];
-                if (dx > sizex / 2) dx = dx - sizex;
-                else if (dx < -sizex / 2) dx = dx + sizex;
-
-                dy = y2[b] - y[a];
-
-                if (dy > sizey / 2) dy = dy - sizey;
-                else if (dy < -sizey / 2) dy = dy + sizey;
-
-                d = sqrt((dx * dx) + (dy * dy));
-
-                if (d < r+r2) {
-                    Fx2[b] += k * (r+r2 - d) * (dx / d);
-                    Fx[a] += -k * (r+r2 - d) * (dx / d);
-                    Fy2[b] += k * (r+r2 - d) * (dy / d);
-                    Fy[a] += -k * (r+r2 - d) * (dy / d);
-
-                }
-
-
                 a = list[a];
             }
         }
@@ -404,7 +345,7 @@ void force(void)
     }
 
     //attractive big same dimer
-    for (a = 0; a < N; a += 2) {
+    for (a = 0; a < N; a += 4) {
         b = a + 1;
 
         dx = x[b] - x[a];
@@ -432,11 +373,11 @@ void force(void)
 
         //big small same dimer
 
-        dx = x2[b] - x[a];
+        dx = x[b+2] - x[a];
         if (dx > sizex / 2) dx = dx - sizex;
         else if (dx < -sizex / 2) dx = dx + sizex;
 
-        dy = y2[b] - y[a];
+        dy = y[b+2] - y[a];
 
         if (dy > sizey / 2) dy = dy - sizey;
         else if (dy < -sizey / 2) dy = dy + sizey;
@@ -444,9 +385,9 @@ void force(void)
         d = sqrt((dx * dx) + (dy * dy));
 
         if (d > r+r2) {
-            Fx2[b] += k * (r+r2 - d) * (dx / d);
+            Fx[b+2] += k * (r+r2 - d) * (dx / d);
             Fx[a] += -k * (r+r2 - d) * (dx / d);
-            Fy2[b] += k * (r+r2 - d) * (dy / d);
+            Fy[b+2] += k * (r+r2 - d) * (dy / d);
             Fy[a] += -k * (r+r2 - d) * (dy / d);
 
         }
@@ -456,11 +397,11 @@ void force(void)
 
 
 
-        dx = x[b] - x2[a];
+        dx = x[b] - x[a+2];
         if (dx > sizex / 2) dx = dx - sizex;
         else if (dx < -sizex / 2) dx = dx + sizex;
 
-        dy = y[b] - y2[a];
+        dy = y[b] - y[a+2];
 
         if (dy > sizey / 2) dy = dy - sizey;
         else if (dy < -sizey / 2) dy = dy + sizey;
@@ -469,20 +410,20 @@ void force(void)
 
         if (d > r+r2) {
             Fx[b] += k * (r+r2 - d) * (dx / d);
-            Fx2[a] += -k * (r+r2 - d) * (dx / d);
+            Fx[a+2] += -k * (r+r2 - d) * (dx / d);
             Fy[b] += k * (r+r2 - d) * (dy / d);
-            Fy2[a] += -k * (r+r2 - d) * (dy / d);
+            Fy[a+2] += -k * (r+r2 - d) * (dy / d);
 
         }
 
 
 
 
-        dx = x2[a] - x[a];
+        dx = x[a+2] - x[a];
         if (dx > sizex / 2) dx = dx - sizex;
         else if (dx < -sizex / 2) dx = dx + sizex;
 
-        dy = y2[a] - y[a];
+        dy = y[a+2] - y[a];
 
         if (dy > sizey / 2) dy = dy - sizey;
         else if (dy < -sizey / 2) dy = dy + sizey;
@@ -490,20 +431,20 @@ void force(void)
         d = sqrt((dx * dx) + (dy * dy));
 
         if (d > r+r2) {
-            Fx2[a] += k * (r+r2 - d) * (dx / d);
+            Fx[a+2] += k * (r+r2 - d) * (dx / d);
             Fx[a] += -k * (r+r2 - d) * (dx / d);
-            Fy2[a] += k * (r+r2 - d) * (dy / d);
+            Fy[a+2] += k * (r+r2 - d) * (dy / d);
             Fy[a] += -k * (r+r2 - d) * (dy / d);
 
         }
 
 
 
-        dx = x2[b] - x[b];
+        dx = x[b+2] - x[b];
         if (dx > sizex / 2) dx = dx - sizex;
         else if (dx < -sizex / 2) dx = dx + sizex;
 
-        dy = y2[b] - y[b];
+        dy = y[b+2] - y[b];
 
         if (dy > sizey / 2) dy = dy - sizey;
         else if (dy < -sizey / 2) dy = dy + sizey;
@@ -511,9 +452,9 @@ void force(void)
         d = sqrt((dx * dx) + (dy * dy));
 
         if (d > r+r2) {
-            Fx2[b] += k * (r+r2 - d) * (dx / d);
+            Fx[b+2] += k * (r+r2 - d) * (dx / d);
             Fx[b] += -k * (r+r2 - d) * (dx / d);
-            Fy2[b] += k * (r+r2 - d) * (dy / d);
+            Fy[b+2] += k * (r+r2 - d) * (dy / d);
             Fy[b] += -k * (r+r2 - d) * (dy / d);
 
         }
@@ -523,80 +464,6 @@ void force(void)
 
 
 
-
-
-
-
-
-//box search for small repulsive
-    for (a = 0; a < by * bx; a++) {
-        head[a] = N;
-    }
-
-
-    for (a = 0; a < N; a++) {
-        box = ((int) (x2[a] * bx / (sizex))) + bx * ((int) (y2[a] * by / (sizey)));
-//printf("%d %d %lf %lf\n",box,a,x[a],y[a]);
-        list[a] = head[box];
-        head[box] = a;
-        actbox[a] = box;
-    }
-
-    for (b = 0; b < N; b++) {
-        a = list[b];
-
-        while (a < N) {
-
-            dx = x2[b] - x2[a];
-            if (dx > sizex / 2) dx = dx - sizex;
-            else if (dx < -sizex / 2) dx = dx + sizex;
-
-            dy = y2[b] - y2[a];
-
-            if (dy > sizey / 2) dy = dy - sizey;
-            else if (dy < -sizey / 2) dy = dy + sizey;
-
-            d = sqrt((dx * dx) + (dy * dy));
-
-            if (d < 2 * r2) {
-                Fx2[b] += k * (2 * r2 - d) * (dx / d);
-                Fx2[a] += -k * (2 * r2 - d) * (dx / d);
-                Fy2[b] += k * (2 * r2 - d) * (dy / d);
-                Fy2[a] += -k * (2 * r2 - d) * (dy / d);
-
-            }
-
-            a = list[a];
-        }
-
-
-        box = actbox[b];
-        for (bsrch = 0; bsrch < 4; bsrch++) {
-            a = head[nn[bsrch][box]];
-            while (a < N) {
-                dx = x2[b] - x2[a];
-                if (dx > sizex / 2) dx = dx - sizex;
-                else if (dx < -sizex / 2) dx = dx + sizex;
-
-                dy = y2[b] - y2[a];
-
-                if (dy > sizey / 2) dy = dy - sizey;
-                else if (dy < -sizey / 2) dy = dy + sizey;
-
-                d = sqrt((dx * dx) + (dy * dy));
-
-                if (d < 2 * r2) {
-                    Fx2[b] += k * (2 * r2 - d) * (dx / d);
-                    Fx2[a] += -k * (2 * r2 - d) * (dx / d);
-                    Fy2[b] += k * (2 * r2 - d) * (dy / d);
-                    Fy2[a] += -k * (2 * r2 - d) * (dy / d);
-
-                }
-                a = list[a];
-            }
-        }
-
-    }
 
 
 
